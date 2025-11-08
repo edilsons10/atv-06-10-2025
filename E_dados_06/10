@@ -1,0 +1,121 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+typedef struct {
+    int senhas[MAX];
+    int inicio;
+    int fim;
+    int total;
+} Fila;
+
+void inicializarFila(Fila *f) {
+    f->inicio = 0;
+    f->fim = 0;
+    f->total = 0;
+}
+
+int filaCheia(Fila *f) {
+    return f->total == MAX;
+}
+
+int filaVazia(Fila *f) {
+    return f->total == 0;
+}
+
+void novaSenha(Fila *f, int senha) {
+    if (filaCheia(f)) {
+        printf("\nFila cheia! Não é possível adicionar nova senha.\n");
+        return;
+    }
+    f->senhas[f->fim] = senha;
+    f->fim = (f->fim + 1) % MAX;
+    f->total++;
+    printf("\nNova senha gerada: S%03d\n", senha);
+}
+
+int atenderSenha(Fila *f) {
+    if (filaVazia(f)) {
+        printf("\nNenhuma senha na fila!\n");
+        return -1;
+    }
+    int senha = f->senhas[f->inicio];
+    f->inicio = (f->inicio + 1) % MAX;
+    f->total--;
+    return senha;
+}
+
+void mostrarFila(Fila *f) {
+    if (filaVazia(f)) {
+        printf("Fila vazia.\n");
+        return;
+    }
+    printf("Fila atual: ");
+    int i, pos = f->inicio;
+    for (i = 0; i < f->total; i++) {
+        printf("S%03d ", f->senhas[pos]);
+        pos = (pos + 1) % MAX;
+    }
+    printf("\n");
+}
+
+int main() {
+    Fila fila;
+    inicializarFila(&fila);
+
+    int opcao;
+    int senhaAtual = 0;
+    int senhaAtendida;
+    int senhasAtendidas[MAX];
+    int totalAtendidas = 0;
+
+    do {
+        printf("\n--- SISTEMA DE ATENDIMENTO ---\n");
+        printf("1 - Nova Senha\n");
+        printf("2 - Atendimento\n");
+        printf("3 - Sair\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                senhaAtual++;
+                novaSenha(&fila, senhaAtual);
+                mostrarFila(&fila);
+                break;
+
+            case 2:
+                senhaAtendida = atenderSenha(&fila);
+                if (senhaAtendida != -1) {
+                    senhasAtendidas[totalAtendidas++] = senhaAtendida;
+                    printf("\nSenha chamada para atendimento: S%03d\n", senhaAtendida);
+                    mostrarFila(&fila);
+                    printf("Senhas atendidas: ");
+                    for (int i = 0; i < totalAtendidas; i++) {
+                        printf("S%03d ", senhasAtendidas[i]);
+                    }
+                    printf("\n");
+                }
+                break;
+
+            case 3:
+                printf("\nEncerrando o sistema...\n");
+                printf("Senhas atendidas durante o dia: ");
+                if (totalAtendidas == 0)
+                    printf("Nenhuma.\n");
+                else {
+                    for (int i = 0; i < totalAtendidas; i++)
+                        printf("S%03d ", senhasAtendidas[i]);
+                    printf("\n");
+                }
+                break;
+
+            default:
+                printf("\nOpção inválida! Tente novamente.\n");
+        }
+
+    } while (opcao != 3);
+
+    return 0;
+}
